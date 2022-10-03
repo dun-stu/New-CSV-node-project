@@ -94,7 +94,7 @@ function ListAccounts(accounts){
     table(AccountsTable)
 }
 
-function ListTransactions(AccountName){
+function ListTransactions(AccountName, accounts){
 
     for (let each in accounts){
 
@@ -109,8 +109,8 @@ function ListTransactions(AccountName){
         if (String(CurrentTransaction.sender)===AccountName)
             {TransactionTableS.push({Transaction: each,
                                 Date: CurrentTransaction.date,
-                                Purpose: CurrentTransaction.purpose,
                                 Recipient: CurrentTransaction.recipient,
+                                Purpose: CurrentTransaction.purpose,               
                                 Value: `£${Number(CurrentTransaction.amount).toFixed(2)}`
                                 })}
 
@@ -118,8 +118,8 @@ function ListTransactions(AccountName){
         //if (String(CurrentTransaction.recipient)===AccountName) redundant
             {TransactionTableR.push({Transaction: each,
                                 Date: CurrentTransaction.date,
-                                Purpose: CurrentTransaction.purpose,
                                 Sender: CurrentTransaction.sender,
+                                Purpose: CurrentTransaction.purpose,
                                 Value: `£${Number(CurrentTransaction.amount).toFixed(2)}`
                                 })}
     }
@@ -129,8 +129,6 @@ function ListTransactions(AccountName){
     console.log('Recieved')
     table(TransactionTableR)
  }
-
-
 
 function FormatTransactions(){
     const data = readFileSync('Transactions2014.csv', 'utf8');
@@ -142,13 +140,10 @@ function FormatTransactions(){
         AllTransactions[e] = new transaction(AllTransactions[e][0],AllTransactions[e][1],AllTransactions[e][2],AllTransactions[e][3],AllTransactions[e][4])
         //console.log(AllTransactions[e].toString())
     }
-
-    
+  
     return AllTransactions
     
 }
-
-
 
 function MakeAccounts(AllTransactions){
     var Names = []
@@ -165,7 +160,7 @@ function MakeAccounts(AllTransactions){
     return accounts
 }
 
-function AccountsTransactionsSync(AllTransactions, accounts){ //to be tested
+function AccountsTransactionsSync(AllTransactions, accounts){ 
 
     for (let e in AllTransactions){ //add the transaction to the sender and recipient accounts
         for (let i in accounts)
@@ -183,15 +178,39 @@ function AccountsTransactionsSync(AllTransactions, accounts){ //to be tested
     
 }
 
-
-
-
-
 function TakeCommand(){
-    let Inp = False
+    let Inp = false
     do {
-    // Command = pkg('Type command into console')
-    
+    //CommandWords = pkg('Type command into console')
+        let CommandWords = '  List todd' //for testing
+        CommandWords = CommandWords.split(' ')
+        let i = 0
+        var temp = []
+        CommandWords.forEach((word)=>{if (!(word === '')){temp.push(word)}})
+        CommandWords = temp
+        if (CommandWords[0].toUpperCase() === 'LIST'){
+            var AllTransactions = FormatTransactions()
+            var accounts = MakeAccounts(AllTransactions)
+            AccountsTransactionsSync(AllTransactions, accounts)
+            if (CommandWords[1].toUpperCase() === 'ALL'){
+                for (let i in accounts){
+                    accounts[i].CalculateBalance()
+                }
+                ListAccounts(accountsaccounts[each].name, accounts)
+                Inp = true          
+            }
+            else {
+                for (let each in accounts){
+                    if (CommandWords.slice(1,CommandWords.length).join(' ').toUpperCase() === accounts[each].name.toUpperCase()){
+                        ListTransactions(accounts[each].name, accounts)
+                        Inp = true
+                    }
+                    if (!Inp){console.error(`Invalid Selection\nPlease type \n\t'List All'\nor\t'List {Valid Account Name}'`)}
+                }
+            }
+        }
+        else {console.error('Invalid Command')}
+
     }
     while(!Inp)
     
@@ -205,16 +224,5 @@ function TakeCommand(){
 
 // for (let i in accounts){
 //     accounts[i].CalculateBalance()
-// }
 
-// Command = pkg('Type command into console')
-// console.log(Command)
-
-
-let test = '  List All'
-test = test.split(' ')
-let i = 0
-let temp = []
-test.map((word)=>{if (!(word === '')){temp.push(word)}})
-test = temp
-test.forEach((word)=>{console.log(word)})
+TakeCommand()
